@@ -1,6 +1,8 @@
-# kardia_anki
+# Kardia
 
-A new Flutter project.
+A new Kardia project.
+現在暗記ビュー機能を実装中！
+結構絶望的！
 
 ## Getting Started
 
