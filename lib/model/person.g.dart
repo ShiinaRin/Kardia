@@ -42,28 +42,33 @@ const PersonSchema = CollectionSchema(
       name: r'explanation',
       type: IsarType.string,
     ),
-    r'lastAnswerDate': PropertySchema(
+    r'important': PropertySchema(
       id: 5,
+      name: r'important',
+      type: IsarType.long,
+    ),
+    r'lastAnswerDate': PropertySchema(
+      id: 6,
       name: r'lastAnswerDate',
       type: IsarType.dateTime,
     ),
     r'lastAnswerStatus': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'lastAnswerStatus',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'name',
       type: IsarType.string,
     ),
     r'questionListId': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'questionListId',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -74,14 +79,7 @@ const PersonSchema = CollectionSchema(
   deserializeProp: _personDeserializeProp,
   idName: r'id',
   indexes: {},
-  links: {
-    r'questionlists': LinkSchema(
-      id: 2633753973102281692,
-      name: r'questionlists',
-      target: r'QuestionList',
-      single: false,
-    )
-  },
+  links: {},
   embeddedSchemas: {},
   getId: _personGetId,
   getLinks: _personGetLinks,
@@ -133,11 +131,12 @@ void _personSerialize(
   writer.writeLong(offsets[2], object.correctCount);
   writer.writeDateTime(offsets[3], object.createdAt);
   writer.writeString(offsets[4], object.explanation);
-  writer.writeDateTime(offsets[5], object.lastAnswerDate);
-  writer.writeString(offsets[6], object.lastAnswerStatus);
-  writer.writeString(offsets[7], object.name);
-  writer.writeLong(offsets[8], object.questionListId);
-  writer.writeDateTime(offsets[9], object.updatedAt);
+  writer.writeLong(offsets[5], object.important);
+  writer.writeDateTime(offsets[6], object.lastAnswerDate);
+  writer.writeString(offsets[7], object.lastAnswerStatus);
+  writer.writeString(offsets[8], object.name);
+  writer.writeLong(offsets[9], object.questionListId);
+  writer.writeDateTime(offsets[10], object.updatedAt);
 }
 
 Person _personDeserialize(
@@ -153,11 +152,12 @@ Person _personDeserialize(
   object.createdAt = reader.readDateTime(offsets[3]);
   object.explanation = reader.readStringOrNull(offsets[4]);
   object.id = id;
-  object.lastAnswerDate = reader.readDateTime(offsets[5]);
-  object.lastAnswerStatus = reader.readStringOrNull(offsets[6]);
-  object.name = reader.readStringOrNull(offsets[7]);
-  object.questionListId = reader.readLong(offsets[8]);
-  object.updatedAt = reader.readDateTime(offsets[9]);
+  object.important = reader.readLongOrNull(offsets[5]);
+  object.lastAnswerDate = reader.readDateTime(offsets[6]);
+  object.lastAnswerStatus = reader.readStringOrNull(offsets[7]);
+  object.name = reader.readStringOrNull(offsets[8]);
+  object.questionListId = reader.readLong(offsets[9]);
+  object.updatedAt = reader.readDateTime(offsets[10]);
   return object;
 }
 
@@ -179,14 +179,16 @@ P _personDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 7:
       return (reader.readStringOrNull(offset)) as P;
     case 8:
-      return (reader.readLong(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -198,13 +200,11 @@ Id _personGetId(Person object) {
 }
 
 List<IsarLinkBase<dynamic>> _personGetLinks(Person object) {
-  return [object.questionlists];
+  return [];
 }
 
 void _personAttach(IsarCollection<dynamic> col, Id id, Person object) {
   object.id = id;
-  object.questionlists
-      .attach(col, col.isar.collection<QuestionList>(), r'questionlists', id);
 }
 
 extension PersonQueryWhereSort on QueryBuilder<Person, Person, QWhere> {
@@ -818,6 +818,75 @@ extension PersonQueryFilter on QueryBuilder<Person, Person, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Person, Person, QAfterFilterCondition> importantIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'important',
+      ));
+    });
+  }
+
+  QueryBuilder<Person, Person, QAfterFilterCondition> importantIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'important',
+      ));
+    });
+  }
+
+  QueryBuilder<Person, Person, QAfterFilterCondition> importantEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'important',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Person, Person, QAfterFilterCondition> importantGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'important',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Person, Person, QAfterFilterCondition> importantLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'important',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Person, Person, QAfterFilterCondition> importantBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'important',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Person, Person, QAfterFilterCondition> lastAnswerDateEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -1276,67 +1345,7 @@ extension PersonQueryFilter on QueryBuilder<Person, Person, QFilterCondition> {
 
 extension PersonQueryObject on QueryBuilder<Person, Person, QFilterCondition> {}
 
-extension PersonQueryLinks on QueryBuilder<Person, Person, QFilterCondition> {
-  QueryBuilder<Person, Person, QAfterFilterCondition> questionlists(
-      FilterQuery<QuestionList> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'questionlists');
-    });
-  }
-
-  QueryBuilder<Person, Person, QAfterFilterCondition>
-      questionlistsLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionlists', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<Person, Person, QAfterFilterCondition> questionlistsIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionlists', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<Person, Person, QAfterFilterCondition>
-      questionlistsIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionlists', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<Person, Person, QAfterFilterCondition>
-      questionlistsLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionlists', 0, true, length, include);
-    });
-  }
-
-  QueryBuilder<Person, Person, QAfterFilterCondition>
-      questionlistsLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionlists', length, include, 999999, true);
-    });
-  }
-
-  QueryBuilder<Person, Person, QAfterFilterCondition>
-      questionlistsLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(
-          r'questionlists', lower, includeLower, upper, includeUpper);
-    });
-  }
-}
+extension PersonQueryLinks on QueryBuilder<Person, Person, QFilterCondition> {}
 
 extension PersonQuerySortBy on QueryBuilder<Person, Person, QSortBy> {
   QueryBuilder<Person, Person, QAfterSortBy> sortByAnswer() {
@@ -1396,6 +1405,18 @@ extension PersonQuerySortBy on QueryBuilder<Person, Person, QSortBy> {
   QueryBuilder<Person, Person, QAfterSortBy> sortByExplanationDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'explanation', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Person, Person, QAfterSortBy> sortByImportant() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'important', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Person, Person, QAfterSortBy> sortByImportantDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'important', Sort.desc);
     });
   }
 
@@ -1533,6 +1554,18 @@ extension PersonQuerySortThenBy on QueryBuilder<Person, Person, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Person, Person, QAfterSortBy> thenByImportant() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'important', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Person, Person, QAfterSortBy> thenByImportantDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'important', Sort.desc);
+    });
+  }
+
   QueryBuilder<Person, Person, QAfterSortBy> thenByLastAnswerDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastAnswerDate', Sort.asc);
@@ -1627,6 +1660,12 @@ extension PersonQueryWhereDistinct on QueryBuilder<Person, Person, QDistinct> {
     });
   }
 
+  QueryBuilder<Person, Person, QDistinct> distinctByImportant() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'important');
+    });
+  }
+
   QueryBuilder<Person, Person, QDistinct> distinctByLastAnswerDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastAnswerDate');
@@ -1695,6 +1734,12 @@ extension PersonQueryProperty on QueryBuilder<Person, Person, QQueryProperty> {
   QueryBuilder<Person, String?, QQueryOperations> explanationProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'explanation');
+    });
+  }
+
+  QueryBuilder<Person, int?, QQueryOperations> importantProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'important');
     });
   }
 

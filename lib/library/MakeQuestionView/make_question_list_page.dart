@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
-import '../model/QuestionList.dart';
+import '../../model/QuestionList.dart';
 
 class MakeQuestionListPage extends StatefulWidget {
   final Isar isar;

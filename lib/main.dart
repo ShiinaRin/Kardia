@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
+import 'package:kardia_anki/TimeLine.dart';
 import 'package:kardia_anki/library/Library.dart';
 
 import "model/person.dart";
-import 'view.dart';
 import "model/QuestionList.dart";
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -77,8 +77,9 @@ class _SideNavigationState extends State<SideNavigation> {
         );
         break;
       case 1:
-        page = ViewPage(
+        page = TimelineScreen(
           isar: isar,
+          questionList: QuestionList(),
         );
         break;
       default:
@@ -99,7 +100,7 @@ class _SideNavigationState extends State<SideNavigation> {
                   ),
                   NavigationRailDestination(
                     icon: Icon(Icons.edit_note),
-                    label: Text('編集'),
+                    label: Text('復習ホーム'),
                   ),
                 ],
                 selectedIndex: selectedIndex,

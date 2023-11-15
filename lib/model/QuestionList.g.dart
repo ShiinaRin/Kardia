@@ -39,15 +39,7 @@ const QuestionListSchema = CollectionSchema(
   deserializeProp: _questionListDeserializeProp,
   idName: r'id',
   indexes: {},
-  links: {
-    r'persons': LinkSchema(
-      id: -7988150904063928474,
-      name: r'persons',
-      target: r'Person',
-      single: false,
-      linkName: r'questionlists',
-    )
-  },
+  links: {},
   embeddedSchemas: {},
   getId: _questionListGetId,
   getLinks: _questionListGetLinks,
@@ -113,13 +105,12 @@ Id _questionListGetId(QuestionList object) {
 }
 
 List<IsarLinkBase<dynamic>> _questionListGetLinks(QuestionList object) {
-  return [object.persons];
+  return [];
 }
 
 void _questionListAttach(
     IsarCollection<dynamic> col, Id id, QuestionList object) {
   object.id = id;
-  object.persons.attach(col, col.isar.collection<Person>(), r'persons', id);
 }
 
 extension QuestionListQueryWhereSort
@@ -507,68 +498,7 @@ extension QuestionListQueryObject
     on QueryBuilder<QuestionList, QuestionList, QFilterCondition> {}
 
 extension QuestionListQueryLinks
-    on QueryBuilder<QuestionList, QuestionList, QFilterCondition> {
-  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition> persons(
-      FilterQuery<Person> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'persons');
-    });
-  }
-
-  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition>
-      personsLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'persons', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition>
-      personsIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'persons', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition>
-      personsIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'persons', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition>
-      personsLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'persons', 0, true, length, include);
-    });
-  }
-
-  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition>
-      personsLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'persons', length, include, 999999, true);
-    });
-  }
-
-  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition>
-      personsLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(
-          r'persons', lower, includeLower, upper, includeUpper);
-    });
-  }
-}
+    on QueryBuilder<QuestionList, QuestionList, QFilterCondition> {}
 
 extension QuestionListQuerySortBy
     on QueryBuilder<QuestionList, QuestionList, QSortBy> {

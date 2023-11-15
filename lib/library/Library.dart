@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
-import 'package:kardia_anki/library/edit_page.dart';
+import 'package:kardia_anki/library/MakeQuestionView/editQuestion.dart';
 import 'package:kardia_anki/main.dart';
 import 'package:kardia_anki/model/QuestionList.dart';
 import 'package:kardia_anki/model/person.dart';
@@ -64,7 +64,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Question Lists'),
+        title: Text('ライブラリ'),
       ),
       body: ListView.builder(
         itemCount: questionLists.length,
@@ -79,18 +79,17 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: Text('Delete Question List'),
-                      content: Text(
-                          'Are you sure you want to delete ${questionLists[index].title}?'),
+                      title: Text('問題リストを削除'),
+                      content: Text('まじで ${questionLists[index].title}を消しますか?'),
                       actions: <Widget>[
                         TextButton(
-                          child: Text('Cancel'),
+                          child: Text('キャンセル'),
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
                         ),
                         TextButton(
-                          child: Text('Delete'),
+                          child: Text('消す'),
                           onPressed: () {
                             Navigator.of(context).pop();
                             _deleteQuestionList(questionLists[index]);
@@ -113,7 +112,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               String _newTitle = '';
 
               return AlertDialog(
-                title: Text('Add Question List'),
+                title: Text('問題リストを追加'),
                 content: TextField(
                   onChanged: (value) {
                     _newTitle = value;
@@ -121,13 +120,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 ),
                 actions: <Widget>[
                   TextButton(
-                    child: Text('Cancel'),
+                    child: Text('キャンセル'),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   TextButton(
-                    child: Text('Add'),
+                    child: Text('追加'),
                     onPressed: () {
                       Navigator.of(context).pop();
                       _addQuestionList(_newTitle);
@@ -199,7 +198,8 @@ class _PersonListScreenState extends State<PersonListScreen> {
                 loadData();
               });
             },
-            leading: _buildIconForStatus(person.lastAnswerStatus),
+            leading:
+                _buildIconForStatus(person.lastAnswerStatus, person.important),
             title: Text("問題:${person.name ?? "値が入ってません"}"),
             subtitle: Text(
               '正解率: ${person.correctCount ?? 0}/${person.atemptCount ?? 0}',
@@ -233,6 +233,22 @@ class _PersonListScreenState extends State<PersonListScreen> {
                     await loadData();
                   },
                 ),
+
+                // 新しいボタンを追加
+                IconButton(
+                  icon: Icon(
+                    person.important == 1 ? Icons.star : Icons.star_border,
+                    color: const Color.fromARGB(255, 170, 170, 170),
+                  ),
+                  onPressed: () async {
+                    // ボタンがタップされた時の処理
+                    person.important = person.important == 1 ? 0 : 1;
+                    await widget.isar.writeTxn(() async {
+                      await widget.isar.persons.put(person);
+                    });
+                    setState(() {});
+                  },
+                ),
               ],
             ),
           );
@@ -258,13 +274,17 @@ class _PersonListScreenState extends State<PersonListScreen> {
     );
   }
 
-  Icon _buildIconForStatus(String? status) {
+  Icon _buildIconForStatus(String? status, int? important) {
     if (status == '正解') {
       return Icon(Icons.check, color: Colors.green);
     } else if (status == '不正解') {
       return Icon(Icons.close, color: Colors.red);
     } else {
-      return Icon(Icons.help, color: Colors.grey);
+      if (important == 1) {
+        return Icon(Icons.help, color: Colors.yellow);
+      } else {
+        return Icon(Icons.help, color: Colors.grey);
+      }
     }
   }
 }
@@ -284,54 +304,60 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('問題の詳細'),
+        title: Text('解答・解説'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('問題: ${widget.question.name}'),
-            Text('答え: ${widget.question.answer}'),
-            Text('解説: ${widget.question.explanation}'),
+            Text(
+              '問題:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              widget.question.name ?? '問題がありません',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            Text(
+              '答え:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              widget.question.answer ?? '答えがありません',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            Text(
+              '解説:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              widget.question.explanation ?? '解説がありません',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                IconButton(
-                  icon: Icon(Icons.check, color: Colors.green, size: 50),
+                ElevatedButton(
                   onPressed: () {
-                    // 正解ボタンが押された時の処理
-                    widget.question.atemptCount =
-                        (widget.question.atemptCount ?? 0) + 1;
-                    widget.question.correctCount =
-                        (widget.question.correctCount ?? 0) + 1;
-                    widget.question.lastAnswerStatus = '正解';
-                    widget.question.lastAnswerDate = DateTime.now(); // 現在の日時を保存
-
-                    widget.isar.writeTxn(() {
-                      return widget.isar.persons.put(widget.question);
-                    });
-
-                    // 検索画面に戻る
-                    Navigator.pop(context);
+                    _handleAnswer(true);
                   },
+                  child: Text('正解', style: TextStyle(fontSize: 16)),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.green),
+                  ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.close, color: Colors.red, size: 50),
+                ElevatedButton(
                   onPressed: () {
-                    // 不正解ボタンが押された時の処理
-                    widget.question.atemptCount =
-                        (widget.question.atemptCount ?? 0) + 1;
-                    widget.question.lastAnswerStatus = '不正解';
-                    widget.question.lastAnswerDate = DateTime.now(); // 現在の日時を保存
-
-                    widget.isar.writeTxn(() {
-                      return widget.isar.persons.put(widget.question);
-                    });
-
-                    // 検索画面に戻る
-                    Navigator.pop(context);
+                    _handleAnswer(false);
                   },
+                  child: Text('不正解', style: TextStyle(fontSize: 16)),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.red),
+                  ),
                 ),
               ],
             ),
@@ -339,5 +365,19 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
         ),
       ),
     );
+  }
+
+  void _handleAnswer(bool isCorrect) {
+    widget.question.atemptCount = (widget.question.atemptCount ?? 0) + 1;
+    widget.question.correctCount =
+        (widget.question.correctCount ?? 0) + (isCorrect ? 1 : 0);
+    widget.question.lastAnswerStatus = isCorrect ? '正解' : '不正解';
+    widget.question.lastAnswerDate = DateTime.now();
+
+    widget.isar.writeTxn(() {
+      return widget.isar.persons.put(widget.question);
+    });
+
+    Navigator.pop(context);
   }
 }
