@@ -41,8 +41,8 @@ class _EditPageState extends State<EditPage> {
                   controller: nameController,
                   maxLines: null, // 改行可能にする
                   decoration: const InputDecoration(
-                    labelText: '問題', // ラベルを追加
-                    hintText: '問題文を入力', // ヒントテキストを設定
+                    labelText: '大問', // ラベルを追加
+                    hintText: '第1問…など', // ヒントテキストを設定
                     border: OutlineInputBorder(), // 外枠を追加
                   ),
                 ),
@@ -51,8 +51,8 @@ class _EditPageState extends State<EditPage> {
                   controller: answerController,
                   maxLines: null, // 改行可能にする
                   decoration: const InputDecoration(
-                    labelText: '解答', // ラベルを追加
-                    hintText: '答えを入力', // ヒントテキストを設定
+                    labelText: '小問', // ラベルを追加
+                    hintText: '(1),(2)など', // ヒントテキストを設定
                     border: OutlineInputBorder(), // 外枠を追加
                   ),
                 ),
@@ -61,8 +61,8 @@ class _EditPageState extends State<EditPage> {
                   controller: explanationController,
                   maxLines: null, // 改行可能にする
                   decoration: const InputDecoration(
-                    labelText: '解説', // ラベルを追加
-                    hintText: '解説を入力', // ヒントテキストを設定
+                    labelText: '解答・解説', // ラベルを追加
+                    hintText: '解答・解説を入力', // ヒントテキストを設定
                     border: OutlineInputBorder(), // 外枠を追加
                   ),
                 ),

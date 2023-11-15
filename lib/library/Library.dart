@@ -41,9 +41,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  void _addQuestionList(String title) async {
+  void _addQuestionList(String title, gaiyo) async {
     final newQuestionList = QuestionList()
       ..title = title
+      ..gaiyo = gaiyo
       ..createdAt = DateTime.now()
       ..updatedAt = DateTime.now();
 
@@ -60,84 +61,228 @@ class _LibraryScreenState extends State<LibraryScreen> {
     loadQuestionLists();
   }
 
+  void _editQuestionList(QuestionList questionList) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditQuestionListScreen(
+          isar: widget.isar,
+          questionList: questionList,
+          onQuestionListUpdated: () {
+            loadQuestionLists(); // フォルダーが編集されたらリストを再読み込み
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ライブラリ'),
+        title: Text('フォルダー'),
       ),
       body: ListView.builder(
         itemCount: questionLists.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(questionLists[index].title),
-            onTap: () => _onListTileTap(questionLists[index]),
-            trailing: IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('問題リストを削除'),
-                      content: Text('まじで ${questionLists[index].title}を消しますか?'),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text('キャンセル'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: Text('消す'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            _deleteQuestionList(questionLists[index]);
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
+          return Card(
+            color: Colors.white,
+            elevation: 4,
+            margin: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: ListTile(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(100)),
+              ),
+              title: Text(questionLists[index].title),
+              //subtitle: Text('ここに何かしらの値を表示: '), // 例: フォルダー内の問題数を表示
+              onTap: () => _onListTileTap(questionLists[index]),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () => _editQuestionList(questionLists[index]),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('フォルダーを削除'),
+                            content: Text(
+                                'まじで ${questionLists[index].title} を消しますか?'),
+                            actions: <Widget>[
+                              TextButton(
+                                child: Text('キャンセル'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              TextButton(
+                                child: Text('消す'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  _deleteQuestionList(questionLists[index]);
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              String _newTitle = '';
-
-              return AlertDialog(
-                title: Text('問題リストを追加'),
-                content: TextField(
-                  onChanged: (value) {
-                    _newTitle = value;
-                  },
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text('キャンセル'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    child: Text('追加'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _addQuestionList(_newTitle);
-                    },
-                  ),
-                ],
-              );
-            },
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddQuestionListScreen(
+                onAddPressed: (title, gaiyo) {
+                  _addQuestionList(title, gaiyo);
+                },
+              ),
+            ),
           );
         },
         child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class AddQuestionListScreen extends StatefulWidget {
+  final Function(String, String) onAddPressed;
+
+  AddQuestionListScreen({required this.onAddPressed});
+
+  @override
+  _AddQuestionListScreenState createState() => _AddQuestionListScreenState();
+}
+
+class _AddQuestionListScreenState extends State<AddQuestionListScreen> {
+  late String _newTitle;
+  late String _newGaiyo;
+
+  @override
+  void initState() {
+    super.initState();
+    _newTitle = '';
+    _newGaiyo = '';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('フォルダーを追加'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              onChanged: (value) {
+                _newTitle = value;
+              },
+              decoration: InputDecoration(labelText: 'タイトル'),
+            ),
+            TextField(
+              onChanged: (value) {
+                _newGaiyo = value;
+              },
+              decoration: InputDecoration(labelText: '概要'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                widget.onAddPressed(_newTitle, _newGaiyo);
+                Navigator.pop(context); // スクリーンを閉じる
+              },
+              child: Text('追加'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// 追加したスクリーン
+class EditQuestionListScreen extends StatefulWidget {
+  final Isar isar;
+  final QuestionList questionList;
+  final Function onQuestionListUpdated;
+
+  EditQuestionListScreen({
+    required this.isar,
+    required this.questionList,
+    required this.onQuestionListUpdated,
+  });
+
+  @override
+  _EditQuestionListScreenState createState() => _EditQuestionListScreenState();
+}
+
+class _EditQuestionListScreenState extends State<EditQuestionListScreen> {
+  late TextEditingController _titleController;
+  late TextEditingController _gaiyoController;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.questionList.title);
+    _gaiyoController = TextEditingController(text: widget.questionList.gaiyo);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('フォルダーを編集'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(labelText: 'フォルダーのタイトル'),
+            ),
+            SizedBox(height: 20),
+            TextField(
+              controller: _gaiyoController,
+              decoration:
+                  InputDecoration(labelText: 'フォルダーの概要'), // 概要のテキストフィールド
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                widget.questionList.title = _titleController.text;
+                widget.questionList.gaiyo = _gaiyoController.text; // 概要の値を更新
+                widget.questionList.updatedAt = DateTime.now();
+
+                await widget.isar.writeTxn(() async {
+                  await widget.isar.questionLists.put(widget.questionList);
+                });
+
+                widget.onQuestionListUpdated(); // 親スクリーンに変更を通知
+                Navigator.pop(context); // スクリーンを閉じる
+              },
+              child: Text('保存'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -198,12 +343,9 @@ class _PersonListScreenState extends State<PersonListScreen> {
                 loadData();
               });
             },
-            leading:
-                _buildIconForStatus(person.lastAnswerStatus, person.important),
-            title: Text("問題:${person.name ?? "値が入ってません"}"),
-            subtitle: Text(
-              '正解率: ${person.correctCount ?? 0}/${person.atemptCount ?? 0}',
-            ),
+            //leading:
+            //_buildIconForStatus(person.lastAnswerStatus, person.important),
+            title: Text("${person.name ?? "値が入ってません"}"),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -235,20 +377,20 @@ class _PersonListScreenState extends State<PersonListScreen> {
                 ),
 
                 // 新しいボタンを追加
-                IconButton(
-                  icon: Icon(
-                    person.important == 1 ? Icons.star : Icons.star_border,
-                    color: const Color.fromARGB(255, 170, 170, 170),
-                  ),
-                  onPressed: () async {
-                    // ボタンがタップされた時の処理
-                    person.important = person.important == 1 ? 0 : 1;
-                    await widget.isar.writeTxn(() async {
-                      await widget.isar.persons.put(person);
-                    });
-                    setState(() {});
-                  },
-                ),
+                //IconButton(
+                //icon: Icon(
+                //person.important == 1 ? Icons.star : Icons.star_border,
+                //color: const Color.fromARGB(255, 170, 170, 170),
+                //),
+                //onPressed: () async {
+                // ボタンがタップされた時の処理
+                //person.important = person.important == 1 ? 0 : 1;
+                //await widget.isar.writeTxn(() async {
+                //await widget.isar.persons.put(person);
+                //});
+                //setState(() {});
+                //},
+                //),
               ],
             ),
           );
@@ -304,7 +446,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('解答・解説'),
+        title: Text('詳細'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -312,7 +454,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '問題:',
+              '大問:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
@@ -321,7 +463,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
             ),
             SizedBox(height: 20),
             Text(
-              '答え:',
+              '小問:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
@@ -330,7 +472,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
             ),
             SizedBox(height: 20),
             Text(
-              '解説:',
+              '解答・解説:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
@@ -338,29 +480,29 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    _handleAnswer(true);
-                  },
-                  child: Text('正解', style: TextStyle(fontSize: 16)),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.green),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    _handleAnswer(false);
-                  },
-                  child: Text('不正解', style: TextStyle(fontSize: 16)),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.red),
-                  ),
-                ),
-              ],
-            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            //   children: [
+            //     ElevatedButton(
+            //       onPressed: () {
+            //         _handleAnswer(true);
+            //       },
+            //       child: Text('正解', style: TextStyle(fontSize: 16)),
+            //       style: ButtonStyle(
+            //         backgroundColor: MaterialStateProperty.all(Colors.green),
+            //       ),
+            //     ),
+            //     ElevatedButton(
+            //       onPressed: () {
+            //         _handleAnswer(false);
+            //       },
+            //       child: Text('不正解', style: TextStyle(fontSize: 16)),
+            //       style: ButtonStyle(
+            //         backgroundColor: MaterialStateProperty.all(Colors.red),
+            //       ),
+            //     ),
+            //   ],
+            // ),
           ],
         ),
       ),

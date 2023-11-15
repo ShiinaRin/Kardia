@@ -22,13 +22,18 @@ const QuestionListSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'title': PropertySchema(
+    r'gaiyo': PropertySchema(
       id: 1,
+      name: r'gaiyo',
+      type: IsarType.string,
+    ),
+    r'title': PropertySchema(
+      id: 2,
       name: r'title',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -53,6 +58,7 @@ int _questionListEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.gaiyo.length * 3;
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
@@ -64,8 +70,9 @@ void _questionListSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDateTime(offsets[0], object.createdAt);
-  writer.writeString(offsets[1], object.title);
-  writer.writeDateTime(offsets[2], object.updatedAt);
+  writer.writeString(offsets[1], object.gaiyo);
+  writer.writeString(offsets[2], object.title);
+  writer.writeDateTime(offsets[3], object.updatedAt);
 }
 
 QuestionList _questionListDeserialize(
@@ -76,9 +83,10 @@ QuestionList _questionListDeserialize(
 ) {
   final object = QuestionList();
   object.createdAt = reader.readDateTime(offsets[0]);
+  object.gaiyo = reader.readString(offsets[1]);
   object.id = id;
-  object.title = reader.readString(offsets[1]);
-  object.updatedAt = reader.readDateTime(offsets[2]);
+  object.title = reader.readString(offsets[2]);
+  object.updatedAt = reader.readDateTime(offsets[3]);
   return object;
 }
 
@@ -94,6 +102,8 @@ P _questionListDeserializeProp<P>(
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
+      return (reader.readString(offset)) as P;
+    case 3:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -246,6 +256,140 @@ extension QuestionListQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition> gaiyoEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'gaiyo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition>
+      gaiyoGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'gaiyo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition> gaiyoLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'gaiyo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition> gaiyoBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'gaiyo',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition>
+      gaiyoStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'gaiyo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition> gaiyoEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'gaiyo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition> gaiyoContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'gaiyo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition> gaiyoMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'gaiyo',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition>
+      gaiyoIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'gaiyo',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterFilterCondition>
+      gaiyoIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'gaiyo',
+        value: '',
       ));
     });
   }
@@ -514,6 +658,18 @@ extension QuestionListQuerySortBy
     });
   }
 
+  QueryBuilder<QuestionList, QuestionList, QAfterSortBy> sortByGaiyo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gaiyo', Sort.asc);
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterSortBy> sortByGaiyoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gaiyo', Sort.desc);
+    });
+  }
+
   QueryBuilder<QuestionList, QuestionList, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -550,6 +706,18 @@ extension QuestionListQuerySortThenBy
   QueryBuilder<QuestionList, QuestionList, QAfterSortBy> thenByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterSortBy> thenByGaiyo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gaiyo', Sort.asc);
+    });
+  }
+
+  QueryBuilder<QuestionList, QuestionList, QAfterSortBy> thenByGaiyoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gaiyo', Sort.desc);
     });
   }
 
@@ -598,6 +766,13 @@ extension QuestionListQueryWhereDistinct
     });
   }
 
+  QueryBuilder<QuestionList, QuestionList, QDistinct> distinctByGaiyo(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'gaiyo', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<QuestionList, QuestionList, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -623,6 +798,12 @@ extension QuestionListQueryProperty
   QueryBuilder<QuestionList, DateTime, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<QuestionList, String, QQueryOperations> gaiyoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'gaiyo');
     });
   }
 
