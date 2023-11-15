@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Kardia Anki',
+      title: 'Kardia',
       theme: ThemeData(
         textTheme: GoogleFonts.bizUDPGothicTextTheme(
           Theme.of(context).textTheme,
@@ -59,6 +59,8 @@ class SideNavigation extends StatefulWidget {
 class _SideNavigationState extends State<SideNavigation> {
   var selectedIndex = 0;
 
+  late Isar isar; // late修飾子を削除
+
   // initState内でwidget.isarを使用する
   @override
   void initState() {
@@ -66,7 +68,6 @@ class _SideNavigationState extends State<SideNavigation> {
     isar = widget.isar;
   }
 
-  late Isar isar; // late修飾子を削除
   @override
   Widget build(BuildContext context) {
     Widget page;
@@ -88,29 +89,60 @@ class _SideNavigationState extends State<SideNavigation> {
 
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
-        body: Row(
-          children: [
-            SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 600,
-                destinations: const [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.library_add_check),
-                    label: Text('Library'),
+        appBar: AppBar(
+          title: Text('Kardia'),
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                ),
+                child: const Text(
+                  'Kardia',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
                   ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.edit_note),
-                    label: Text('復習ホーム'),
-                  ),
-                ],
-                selectedIndex: selectedIndex,
-                onDestinationSelected: (value) {
+                ),
+              ),
+              ListTile(
+                title: Text('Library'),
+                leading: Icon(Icons.library_add_check),
+                onTap: () {
                   setState(() {
-                    selectedIndex = value;
+                    selectedIndex = 0;
+                    Navigator.pop(context); // DrawerアイテムがタップされたらDrawerを閉じる
                   });
                 },
               ),
-            ),
+              ListTile(
+                title: Text('復習ホーム'),
+                leading: Icon(Icons.edit_note),
+                onTap: () {
+                  setState(() {
+                    selectedIndex = 1;
+                    Navigator.pop(context); // DrawerアイテムがタップされたらDrawerを閉じる
+                  });
+                },
+              ),
+              ListTile(
+                title: Text('リッチなエディタ'),
+                leading: Icon(Icons.edit_document),
+                onTap: () {
+                  setState(() {
+                    selectedIndex = 2;
+                    Navigator.pop(context); // DrawerアイテムがタップされたらDrawerを閉じる
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        body: Row(
+          children: [
             Expanded(
               child: Container(
                 color: Theme.of(context).colorScheme.primaryContainer,
@@ -142,6 +174,7 @@ class _AddPageState extends State<AddPage> {
   final nameController = TextEditingController();
   final answerController = TextEditingController();
   final explanationController = TextEditingController();
+
   final _nameFocusNode = FocusNode(); // 名前フィールドのFocusNodeを作成
 
   @override
@@ -176,7 +209,7 @@ class _AddPageState extends State<AddPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('問題追加'),
+        title: const Text('AddQuestions'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -189,8 +222,8 @@ class _AddPageState extends State<AddPage> {
               focusNode: _nameFocusNode, // 名前フィールドにFocusNodeを設定
               maxLines: null,
               decoration: const InputDecoration(
-                labelText: '問題',
-                hintText: '問題文を入力',
+                labelText: '大問',
+                hintText: '第1問…など',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -199,8 +232,8 @@ class _AddPageState extends State<AddPage> {
               controller: answerController,
               maxLines: null,
               decoration: const InputDecoration(
-                labelText: '解答',
-                hintText: '答えを入力',
+                labelText: '小問',
+                hintText: "(1),(2)など",
                 border: OutlineInputBorder(),
               ),
             ),
@@ -209,8 +242,8 @@ class _AddPageState extends State<AddPage> {
               controller: explanationController,
               maxLines: null,
               decoration: const InputDecoration(
-                labelText: '解説',
-                hintText: '解説を入力',
+                labelText: '解答・解説',
+                hintText: '解答・解説を入力',
                 border: OutlineInputBorder(),
               ),
             ),
